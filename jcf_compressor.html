@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCF Compressor - Web Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.dragging {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #999;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-info {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .file-info.show {
+            display: block;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .file-details {
+            color: #666;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .action-btn.show {
+            display: block;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .action-btn:active {
+            transform: translateY(0);
+        }
+        
+        .action-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-bar.show {
+            display: block;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .result {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗜️ JCF Compressor</h1>
+        <p class="subtitle">JSON Compressed Format - Compress any file type</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('compress')">Compress</button>
+            <button class="tab" onclick="switchTab('decompress')">Decompress</button>
+        </div>
+        
+        <!-- Compress Tab -->
+        <div id="compress" class="tab-content active">
+            <div class="upload-area" id="compressUpload" onclick="document.getElementById('compressFile').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click to select a file or drag & drop</div>
+                <div class="upload-hint">Supports images, JSON, text, and all file types</div>
+            </div>
+            <input type="file" id="compressFile" onchange="handleCompressFile(this.files[0])">
+            
+            <div class="file-info" id="compressInfo">
+                <div class="file-name" id="compressFileName"></div>
+                <div class="file-details">
+                    <div class="detail-item">
+                        <span>Size:</span>
+                        <span id="compressSize"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Type:</span>
+                        <span id="compressType"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-bar" id="compressProgress">
+                <div class="progress-fill" id="compressProgressFill"></div>
+            </div>
+            
+            <button class="action-btn" id="compressBtn" onclick="compressFile()">
+                Compress to .jcf
+            </button>
+            
+            <div class="result" id="compressResult"></div>
+        </div>
+        
+        <!-- Decompress Tab -->
+        <div id="decompress" class="tab-content">
+            <div class="upload-area" id="decompressUpload" onclick="document.getElementById('decompressFile').click()">
+                <div class="upload-icon">📦</div>
+                <div class="upload-text">Click to select a .jcf file or drag & drop</div>
+                <div class="upload-hint">Only .jcf files are supported</div>
+            </div>
+            <input type="file" id="decompressFile" accept=".jcf" onchange="handleDecompressFile(this.files[0])">
+            
+            <div class="file-info" id="decompressInfo">
+                <div class="file-name" id="decompressFileName"></div>
+                <div class="file-details">
+                    <div class="detail-item">
+                        <span>Compressed Size:</span>
+                        <span id="decompressSize"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Original Name:</span>
+                        <span id="decompressOriginalName"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-bar" id="decompressProgress">
+                <div class="progress-fill" id="decompressProgressFill"></div>
+            </div>
+            
+            <button class="action-btn" id="decompressBtn" onclick="decompressFile()">
+                Decompress File
+            </button>
+            
+            <div class="result" id="decompressResult"></div>
+        </div>
+        
+        <div class="footer">
+            JCF Format v1.0 - Custom Compression System
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script>
+        let compressFileData = null;
+        let decompressFileData = null;
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        // Drag and drop for compress
+        const compressUpload = document.getElementById('compressUpload');
+        compressUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            compressUpload.classList.add('dragging');
+        });
+        
+        compressUpload.addEventListener('dragleave', () => {
+            compressUpload.classList.remove('dragging');
+        });
+        
+        compressUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            compressUpload.classList.remove('dragging');
+            if (e.dataTransfer.files.length > 0) {
+                handleCompressFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Drag and drop for decompress
+        const decompressUpload = document.getElementById('decompressUpload');
+        decompressUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            decompressUpload.classList.add('dragging');
+        });
+        
+        decompressUpload.addEventListener('dragleave', () => {
+            decompressUpload.classList.remove('dragging');
+        });
+        
+        decompressUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            decompressUpload.classList.remove('dragging');
+            if (e.dataTransfer.files.length > 0) {
+                handleDecompressFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Handle compress file selection
+        function handleCompressFile(file) {
+            if (!file) return;
+            
+            compressFileData = file;
+            document.getElementById('compressFileName').textContent = file.name;
+            document.getElementById('compressSize').textContent = formatBytes(file.size);
+            document.getElementById('compressType').textContent = file.type || 'Unknown';
+            
+            document.getElementById('compressInfo').classList.add('show');
+            document.getElementById('compressBtn').classList.add('show');
+            document.getElementById('compressResult').classList.remove('show');
+        }
+        
+        // Handle decompress file selection
+        function handleDecompressFile(file) {
+            if (!file) return;
+            
+            if (!file.name.endsWith('.jcf')) {
+                showResult('decompressResult', 'Please select a .jcf file', true);
+                return;
+            }
+            
+            decompressFileData = file;
+            
+            // Read JCF header to get info
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                try {
+                    const info = readJCFHeader(data);
+                    document.getElementById('decompressFileName').textContent = file.name;
+                    document.getElementById('decompressSize').textContent = formatBytes(file.size);
+                    document.getElementById('decompressOriginalName').textContent = info.originalFilename;
+                    
+                    document.getElementById('decompressInfo').classList.add('show');
+                    document.getElementById('decompressBtn').classList.add('show');
+                    document.getElementById('decompressResult').classList.remove('show');
+                } catch (err) {
+                    showResult('decompressResult', 'Invalid JCF file: ' + err.message, true);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Compress file
+        async function compressFile() {
+            if (!compressFileData) return;
+            
+            const btn = document.getElementById('compressBtn');
+            btn.disabled = true;
+            btn.textContent = 'Compressing...';
+            
+            showProgress('compressProgress', 0);
+            
+            try {
+                const arrayBuffer = await compressFileData.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                
+                showProgress('compressProgress', 30);
+                
+                // Compress with pako (zlib)
+                const compressed = pako.deflate(data, { level: 9 });
+                
+                showProgress('compressProgress', 70);
+                
+                // Create JCF file
+                const jcfData = createJCFFile(compressFileData.name, data, compressed);
+                
+                showProgress('compressProgress', 100);
+                
+                // Download
+                const blob = new Blob([jcfData], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = compressFileData.name + '.jcf';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                const ratio = ((1 - compressed.length / data.length) * 100).toFixed(2);
+                
+                const resultHTML = `
+                    <strong>✅ Compression Successful!</strong>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${formatBytes(data.length)}</div>
+                            <div class="stat-label">Original Size</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${formatBytes(compressed.length)}</div>
+                            <div class="stat-label">Compressed Size</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${ratio}%</div>
+                            <div class="stat-label">Space Saved</div>
+                        </div>
+                    </div>
+                `;
+                
+                showResult('compressResult', resultHTML, false);
+                
+            } catch (err) {
+                showResult('compressResult', 'Compression failed: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Compress to .jcf';
+                hideProgress('compressProgress');
+            }
+        }
+        
+        // Decompress file
+        async function decompressFile() {
+            if (!decompressFileData) return;
+            
+            const btn = document.getElementById('decompressBtn');
+            btn.disabled = true;
+            btn.textContent = 'Decompressing...';
+            
+            showProgress('decompressProgress', 0);
+            
+            try {
+                const arrayBuffer = await decompressFileData.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                
+                showProgress('decompressProgress', 30);
+                
+                const { originalFilename, originalSize, compressedSize, compressedData } = parseJCFFile(data);
+                
+                showProgress('decompressProgress', 70);
+                
+                // Decompress with pako
+                const decompressed = pako.inflate(compressedData);
+                
+                showProgress('decompressProgress', 100);
+                
+                // Verify size
+                if (decompressed.length !== originalSize) {
+                    throw new Error('Decompressed size mismatch');
+                }
+                
+                // Download
+                const blob = new Blob([decompressed], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = originalFilename;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                const resultHTML = `
+                    <strong>✅ Decompression Successful!</strong>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${formatBytes(originalSize)}</div>
+                            <div class="stat-label">Original Size</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${originalFilename}</div>
+                            <div class="stat-label">File Downloaded</div>
+                        </div>
+                    </div>
+                `;
+                
+                showResult('decompressResult', resultHTML, false);
+                
+            } catch (err) {
+                showResult('decompressResult', 'Decompression failed: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Decompress File';
+                hideProgress('decompressProgress');
+            }
+        }
+        
+        // Create JCF file format
+        function createJCFFile(filename, originalData, compressedData) {
+            const filenameBytes = new TextEncoder().encode(filename);
+            const headerSize = 4 + 1 + 2 + filenameBytes.length + 8 + 8;
+            const totalSize = headerSize + compressedData.length;
+            
+            const jcfData = new Uint8Array(totalSize);
+            let offset = 0;
+            
+            // Magic number "JCF1"
+            jcfData.set([0x4A, 0x43, 0x46, 0x31], offset);
+            offset += 4;
+            
+            // Version
+            jcfData[offset++] = 1;
+            
+            // Filename length (2 bytes)
+            const view = new DataView(jcfData.buffer);
+            view.setUint16(offset, filenameBytes.length, false);
+            offset += 2;
+            
+            // Filename
+            jcfData.set(filenameBytes, offset);
+            offset += filenameBytes.length;
+            
+            // Original size (8 bytes)
+            view.setBigUint64(offset, BigInt(originalData.length), false);
+            offset += 8;
+            
+            // Compressed size (8 bytes)
+            view.setBigUint64(offset, BigInt(compressedData.length), false);
+            offset += 8;
+            
+            // Compressed data
+            jcfData.set(compressedData, offset);
+            
+            return jcfData;
+        }
+        
+        // Read JCF header
+        function readJCFHeader(data) {
+            let offset = 0;
+            
+            // Check magic number
+            const magic = String.fromCharCode(...data.slice(0, 4));
+            if (magic !== 'JCF1') {
+                throw new Error('Invalid JCF file');
+            }
+            offset += 4;
+            
+            // Version
+            const version = data[offset++];
+            
+            // Filename length
+            const view = new DataView(data.buffer);
+            const filenameLength = view.getUint16(offset, false);
+            offset += 2;
+            
+            // Filename
+            const filenameBytes = data.slice(offset, offset + filenameLength);
+            const originalFilename = new TextDecoder().decode(filenameBytes);
+            
+            return { originalFilename, version };
+        }
+        
+        // Parse JCF file
+        function parseJCFFile(data) {
+            let offset = 0;
+            
+            // Check magic number
+            const magic = String.fromCharCode(...data.slice(0, 4));
+            if (magic !== 'JCF1') {
+                throw new Error('Invalid JCF file');
+            }
+            offset += 4;
+            
+            // Version
+            const version = data[offset++];
+            if (version !== 1) {
+                throw new Error('Unsupported JCF version');
+            }
+            
+            // Filename length
+            const view = new DataView(data.buffer);
+            const filenameLength = view.getUint16(offset, false);
+            offset += 2;
+            
+            // Filename
+            const filenameBytes = data.slice(offset, offset + filenameLength);
+            const originalFilename = new TextDecoder().decode(filenameBytes);
+            offset += filenameLength;
+            
+            // Original size
+            const originalSize = Number(view.getBigUint64(offset, false));
+            offset += 8;
+            
+            // Compressed size
+            const compressedSize = Number(view.getBigUint64(offset, false));
+            offset += 8;
+            
+            // Compressed data
+            const compressedData = data.slice(offset, offset + compressedSize);
+            
+            return { originalFilename, originalSize, compressedSize, compressedData };
+        }
+        
+        // Utility functions
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+        
+        function showProgress(id, percent) {
+            document.getElementById(id).classList.add('show');
+            document.getElementById(id + 'Fill').style.width = percent + '%';
+        }
+        
+        function hideProgress(id) {
+            setTimeout(() => {
+                document.getElementById(id).classList.remove('show');
+                document.getElementById(id + 'Fill').style.width = '0%';
+            }, 500);
+        }
+        
+        function showResult(id, message, isError) {
+            const result = document.getElementById(id);
+            result.innerHTML = message;
+            result.classList.add('show');
+            if (isError) {
+                result.classList.add('error');
+            } else {
+                result.classList.remove('error');
+            }
+        }
+    </script>
+</body>
+</html>

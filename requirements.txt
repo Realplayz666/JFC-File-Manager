@@ -1,0 +1,6 @@
+# JCF Compressor Requirements
+# No external dependencies required for core functionality!
+# tkinter is included with standard Python installations
+
+# Optional: For building standalone executables
+# pyinstaller>=5.0
