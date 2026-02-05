@@ -10,7 +10,7 @@ import struct
 from pathlib import Path
 from typing import Union
 
-# Magic number for .jcf files
+
 MAGIC_NUMBER = b'JCF1'
 VERSION = 1
 
@@ -18,21 +18,11 @@ class JCFError(Exception):
     pass
 
 class JCFCompressor:
-    """Handles compression and decompression of files to .jcf format"""
+    
     
     @staticmethod
     def compress_file(input_path: str, output_path: str = None, compression_level: int = 9) -> str:
-        """
-        Compress a file to .jcf format
         
-        Args:
-            input_path: Path to input file
-            output_path: Path to output .jcf file (optional)
-            compression_level: Compression level 1-9 (default: 9)
-            
-        Returns:
-            Path to compressed file
-        """
         if not os.path.exists(input_path):
             raise JCFError(f"Input file not found: {input_path}")
         
@@ -79,16 +69,7 @@ class JCFCompressor:
     
     @staticmethod
     def decompress_file(input_path: str, output_path: str = None) -> str:
-        """
-        Decompress a .jcf file
         
-        Args:
-            input_path: Path to .jcf file
-            output_path: Path to output file (optional)
-            
-        Returns:
-            Path to decompressed file
-        """
         if not os.path.exists(input_path):
             raise JCFError(f"Input file not found: {input_path}")
         
@@ -138,7 +119,7 @@ class JCFCompressor:
     
     @staticmethod
     def get_info(jcf_path: str) -> dict:
-        """Get information about a .jcf file without decompressing"""
+        
         if not os.path.exists(jcf_path):
             raise JCFError(f"File not found: {jcf_path}")
         
