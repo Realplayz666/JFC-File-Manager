@@ -9,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-# Import the JCF compressor library
+
 from jcf_compressor import JCFCompressor, JCFError
 
 
@@ -20,11 +20,11 @@ class JCFCompressorGUI:
         self.root.geometry("700x600")
         self.root.resizable(True, True)
         
-        # Configure style
+        
         self.style = ttk.Style()
         self.style.theme_use('clam')
         
-        # Custom colors
+        
         self.primary_color = "#667eea"
         self.secondary_color = "#764ba2"
         self.bg_color = "#f5f5f5"
@@ -33,12 +33,12 @@ class JCFCompressorGUI:
         
         self.create_widgets()
         
-        # Current file
+        
         self.current_file = None
         self.operation_mode = "compress"  # compress or decompress
     
     def create_widgets(self):
-        # Header
+        
         header_frame = tk.Frame(self.root, bg=self.primary_color, height=100)
         header_frame.pack(fill=tk.X)
         header_frame.pack_propagate(False)
@@ -61,11 +61,11 @@ class JCFCompressorGUI:
         )
         subtitle_label.pack()
         
-        # Main content
+       
         content_frame = tk.Frame(self.root, bg=self.bg_color, padx=30, pady=20)
         content_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Mode selection
+        
         mode_frame = tk.Frame(content_frame, bg=self.bg_color)
         mode_frame.pack(fill=tk.X, pady=(0, 20))
         
@@ -96,7 +96,7 @@ class JCFCompressorGUI:
         )
         decompress_radio.pack(side=tk.LEFT, padx=5)
         
-        # File selection area
+       
         file_frame = tk.LabelFrame(
             content_frame,
             text="File Selection",
@@ -107,7 +107,7 @@ class JCFCompressorGUI:
         )
         file_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
         
-        # Drag and drop area (simulated)
+        
         self.drop_area = tk.Frame(
             file_frame,
             bg="white",
@@ -135,7 +135,7 @@ class JCFCompressorGUI:
         )
         drop_text.pack()
         
-        # Browse button
+        
         browse_btn = tk.Button(
             file_frame,
             text="📂 Browse Files",
@@ -152,7 +152,7 @@ class JCFCompressorGUI:
         )
         browse_btn.pack()
         
-        # File info display
+        
         self.info_frame = tk.LabelFrame(
             content_frame,
             text="File Information",
@@ -175,7 +175,7 @@ class JCFCompressorGUI:
         self.info_text.insert("1.0", "No file selected")
         self.info_text.config(state=tk.DISABLED)
         
-        # Action buttons
+        
         button_frame = tk.Frame(content_frame, bg=self.bg_color)
         button_frame.pack(fill=tk.X)
         
@@ -211,14 +211,14 @@ class JCFCompressorGUI:
         )
         clear_btn.pack(side=tk.LEFT)
         
-        # Progress bar
+        
         self.progress = ttk.Progressbar(
             content_frame,
             mode='indeterminate',
             length=300
         )
         
-        # Footer
+        
         footer = tk.Label(
             self.root,
             text="JCF Format v1.0 - Custom Compression System",
@@ -256,7 +256,7 @@ class JCFCompressorGUI:
         self.current_file = filepath
         self.action_btn.config(state=tk.NORMAL)
         
-        # Update info display
+        
         self.info_text.config(state=tk.NORMAL)
         self.info_text.delete("1.0", tk.END)
         
@@ -289,7 +289,7 @@ class JCFCompressorGUI:
         self.progress.pack(pady=10)
         self.progress.start(10)
         
-        # Use after to prevent GUI freezing
+       
         self.root.after(100, self._perform_action_worker)
     
     def _perform_action_worker(self):
@@ -317,7 +317,7 @@ class JCFCompressorGUI:
                         f"Saved to: {result_path}"
                     )
             else:
-                # Ask for output location
+                
                 try:
                     jcf_info = JCFCompressor.get_info(self.current_file)
                     default_name = jcf_info['filename']
@@ -369,7 +369,7 @@ def main():
     root = tk.Tk()
     app = JCFCompressorGUI(root)
     
-    # Center window
+    
     root.update_idletasks()
     width = root.winfo_width()
     height = root.winfo_height()
